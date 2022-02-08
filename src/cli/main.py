@@ -6,6 +6,21 @@ from ..observability.collectors import DatabaseCollector
 from ..etl.github.etl import ETL
 from ..etl.github.db import Database
 from ..paths.paths import ETL_DATA_PATH
+import json
+
+CODE_ENV = os.environ.get("DATAOPS_CODE_ENV") or "DEV"
+
+code_env_dict = {
+    "DEV": "database-local-dev",
+    "STAGING": "database-staging",
+    "PROD": "database-production"
+}
+
+VAULT_TOKEN = os.popen(
+    f'vault login -format json -method userpass username=dataops_bob password={os.environ.get("DATAOPS_BOB_VAULT_PASS")} | jq ".auth.client_token"').read()
+db_secrets = json.loads(os.popen('vault kv get -format=json dataops_staging/database').read())
+
+os.environ["DATAOPS_STAGING_DB_PASS"] = db_secrets["data"]["data"]["password"]
 
 
 @click.group()
@@ -13,11 +28,12 @@ def main():
     global DB_CONFIG
     DB_CONFIG = _get_db_config()
 
+
 def _get_db_config():
     global CONFIG
     CONFIG = ConfigParser(os.environ)
     CONFIG.read('./config.ini')
-    db_config = CONFIG["database-local-dev"]
+    db_config = CONFIG[code_env_dict[CODE_ENV]]
 
     return db_config
 
