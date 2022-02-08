@@ -1,0 +1,12 @@
+version: "3.2"
+services:
+  postgres:
+    container_name: local-dev-postgres
+    image: postgres:13-alpine
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./init-sql/:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_USER: "${DATAOPS_STAGING_DB_USER}"
+      POSTGRES_PASSWORD: "${DATAOPS_STAGING_DB_PASS}"

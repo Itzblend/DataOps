@@ -1,0 +1,29 @@
+
+version: 2
+
+models:
+  - name: github_issues
+    description: "Incremental load from github issues data lake"
+
+sources:
+  - name: issues_json
+    database: github
+    schema: datalake
+    tables:
+      - name: issues_json
+        columns:
+          - name: ((data ->> 'id'), (data ->> 'updated_at'))
+            tests:
+              - unique
+              - not_null
+
+  - name: pulls_json
+    database: github
+    schema: datalake
+    tables:
+      - name: pulls_json
+        columns:
+          - name: data ->> 'id'
+            tests:
+              - unique
+              - not_null
