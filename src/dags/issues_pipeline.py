@@ -38,7 +38,7 @@ def _failure_criteria(record):
     return True if not record else False
 
 with DAG(
-    'Github issues data pipeline',
+    'github_issues_data_pipeline',
     default_args=default_args,
     description='Fetch and load github issues to datalake',
     schedule_interval=timedelta(minutes=5),
@@ -50,13 +50,13 @@ with DAG(
 
 
     t1 = BashOperator(
-        task_id='load_issues',
-        bash_command='cd ../.. && python3 main.py fetch-issues'
+        task_id='fetch_issues',
+        bash_command='cd ~/dags/Dataops && python3 main.py fetch-issues'
     )
 
     t2 = BashOperator(
         task_id='load_issues',
-        bash_command='cd ../.. && python3 main.py load-issues'
+        bash_command='cd ~/dags/Dataops && python3 main.py load-issues'
     )
 
     t1 >> t2
