@@ -16,9 +16,16 @@ code_env_dict = {
     "PROD": "database-production"
 }
 
-VAULT_TOKEN = os.popen(
-    f'vault login -format json -method userpass username=dataops_bob password={os.environ.get("DATAOPS_BOB_VAULT_PASS")} | jq ".auth.client_token"').read()
-db_secrets = json.loads(os.popen('vault kv get -format=json dataops_staging/database').read())
+login_resp = json.loads(os.popen("""curl -s \
+                       --request POST \
+                       --data '{"password": "'"$DATAOPS_BOB_VAULT_PASS"'"}' \
+                       ${VAULT_ADDR}/v1/auth/userpass/login/dataops_bob""").read())
+os.environ["VAULT_TOKEN"] = login_resp["auth"]["client_token"]
+
+db_secrets = json.loads(os.popen(f"""curl -s \
+                        --request GET \
+                        -H "X-Vault-Token: {os.environ["VAULT_TOKEN"]}" \
+                        {os.environ["VAULT_ADDR"]}/v1/dataops_staging/data/database""").read())
 
 os.environ["DATAOPS_STAGING_DB_PASS"] = db_secrets["data"]["data"]["password"]
 
