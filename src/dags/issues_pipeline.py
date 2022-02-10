@@ -1,11 +1,17 @@
 from datetime import datetime, timedelta
-from textwrap import dedent
+import os
+from airflow.models import Variable
+
+os.environ["DATAOPS_BOB_VAULT_PASS"] = Variable.get("DATAOPS_BOB_VAULT_PASS")
+os.environ["VAULT_ADDR"] = Variable.get("VAULT_ADDR")
+os.environ["github_token"] = Variable.get("github_token")
 
 # The DAG object; we'll need this to instantiate a DAG
 from airflow import DAG
 
 # Operators; we need this to operate!
 from airflow.operators.bash import BashOperator
+
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
 default_args = {
@@ -31,12 +37,6 @@ default_args = {
     # 'trigger_rule': 'all_success'
 }
 
-def _success_criteria(record):
-    return record
-
-def _failure_criteria(record):
-    return True if not record else False
-
 with DAG(
     'github_issues_data_pipeline',
     default_args=default_args,
@@ -51,12 +51,12 @@ with DAG(
 
     t1 = BashOperator(
         task_id='fetch_issues',
-        bash_command='cd ~/dags/Dataops && python3 main.py fetch-issues'
+        bash_command='cd /opt/airflow/dags/Dataops && python3 main.py fetch-issues --database github'
     )
 
     t2 = BashOperator(
         task_id='load_issues',
-        bash_command='cd ~/dags/Dataops && python3 main.py load-issues'
+        bash_command='cd /opt/airflow/dags/Dataops && python3 main.py load-github-issues --database github'
     )
 
     t1 >> t2
