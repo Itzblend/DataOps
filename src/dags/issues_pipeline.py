@@ -5,6 +5,7 @@ from airflow.models import Variable
 os.environ["DATAOPS_BOB_VAULT_PASS"] = Variable.get("DATAOPS_BOB_VAULT_PASS")
 os.environ["VAULT_ADDR"] = Variable.get("VAULT_ADDR")
 os.environ["github_token"] = Variable.get("github_token")
+os.environ["DATAOPS_CODE_ENV"] = Variable.get("DATAOPS_CODE_ENV")
 
 # The DAG object; we'll need this to instantiate a DAG
 from airflow import DAG
