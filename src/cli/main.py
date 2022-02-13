@@ -125,7 +125,24 @@ def fetch_commits(database: str):
 @click.option('--database')
 def load_github_commits(database: str):
     db = Database(host=DB_CONFIG["host"], port=DB_CONFIG["port"],
-                 user=DB_CONFIG["user"], password=DB_CONFIG["password"],
-                 database=database)
+                  user=DB_CONFIG["user"], password=DB_CONFIG["password"],
+                  database=database)
 
     db.load_json_files(data_dir=f'{ETL_DATA_PATH}/commits', schema='datalake', table='commits_json')
+
+
+@main.command()
+@click.option('--database', default='github')
+def fetch_org_events(database: str):
+    etl = ETL('dbt-labs', config=CONFIG, db_config=DB_CONFIG, database=database)
+    etl.fetch_org_events(save_folder='org_events')
+
+
+@main.command()
+@click.option('--database')
+def load_org_events(database: str):
+    db = Database(host=DB_CONFIG["host"], port=DB_CONFIG["port"],
+                  user=DB_CONFIG["user"], password=DB_CONFIG["password"],
+                  database=database)
+
+    db.load_json_files(data_dir=f'{ETL_DATA_PATH}/org_events', schema='datalake', table='org_events_json')

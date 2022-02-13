@@ -45,7 +45,7 @@ class SchemaManager:
         shutil.rmtree(DDL_PATH, ignore_errors=True)
         os.makedirs(DDL_PATH, exist_ok=True)
 
-        database_schema_folders = (set([directory for a, directory, c in os.walk('postgres_schemas')
+        database_schema_folders = (set([directory for a, directory, c in os.walk(POSTGRES_SCHEMAS_PATH)
                                         if directory][0]))
 
         # Read the default postgres tables to weed them out from processing
@@ -57,7 +57,7 @@ class SchemaManager:
 
             db_schema_table_tuple = set([(row["table_catalog"], row["table_schema"], row["table_name"]) for row in
                                          self.newline_json_generator(
-                                             f'postgres_schemas/{database_schema_folder}/tables.json') if
+                                             f'{POSTGRES_SCHEMAS_PATH}/{database_schema_folder}/tables.json') if
                                          row["table_name"] not in postgres_default_tables])
 
             for db, schema, table in db_schema_table_tuple:
@@ -66,13 +66,13 @@ class SchemaManager:
 
                 columns_and_types = [(row["column_name"], row["data_type"], row["column_default"]) for row in
                                      self.newline_json_generator(
-                                         f'postgres_schemas/{database_schema_folder}/columns.json') if
+                                         f'{POSTGRES_SCHEMAS_PATH}/{database_schema_folder}/columns.json') if
                                      row["table_name"] == table]
 
                 try:
                     primary_keys = [row["column_name"] for row in
                                     self.newline_json_generator(
-                                        f'postgres_schemas/{database_schema_folder}/primary_keys.json')
+                                        f'{POSTGRES_SCHEMAS_PATH}/{database_schema_folder}/primary_keys.json')
                                     if row["table_name"] == table]
                 except FileNotFoundError:
                     primary_keys = []
@@ -115,7 +115,7 @@ class SchemaManager:
         # Creating a primary key dictionary to use later
         primary_keys = {}
         try:
-            for row in self.newline_json_generator('postgres_schemas/github_primary_keys.json'):
+            for row in self.newline_json_generator(f'{POSTGRES_SCHEMAS_PATH}/github_primary_keys.json'):
                 if row["table_name"] not in primary_keys.keys():
                     primary_keys[row["table_name"]] = []
                     primary_keys[row["table_name"]].append(row["column_name"])
@@ -124,13 +124,13 @@ class SchemaManager:
         except FileNotFoundError:
             pass
 
-        database_schema_folders = (set([directory for a, directory, c in os.walk('postgres_schemas')
+        database_schema_folders = (set([directory for a, directory, c in os.walk(POSTGRES_SCHEMAS_PATH)
                                         if directory][0]))
 
         for database_schema_folder in database_schema_folders:
             db_schema_table_tuple = set([(row["table_catalog"], row["table_schema"], row["table_name"]) for row in
                                          self.newline_json_generator(
-                                             f'postgres_schemas/{database_schema_folder}/tables.json') if
+                                             f'{POSTGRES_SCHEMAS_PATH}/{database_schema_folder}/tables.json') if
                                          row["table_name"] not in postgres_default_tables])
 
             for database, schema, table in db_schema_table_tuple:
@@ -138,7 +138,7 @@ class SchemaManager:
                 col_type_default_tuple = [
                     (row["column_name"], row["data_type"],
                      row["column_default"]) for row in
-                    self.newline_json_generator(f'postgres_schemas/{database_schema_folder}/columns.json') if
+                    self.newline_json_generator(f'{POSTGRES_SCHEMAS_PATH}/{database_schema_folder}/columns.json') if
                     row["table_name"] == table]
 
                 table_configuration["database"] = database

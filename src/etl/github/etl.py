@@ -69,6 +69,9 @@ class Organization:
     def get_commits_endpoint(self, repository):
         return f"{self.baseurl}/repos/{self.org}/{repository}/commits"
 
+    def get_org_events_endpoint(self, repository):
+        return f"{self.baseurl}/orgs/{self.org}/events"
+
 
 class ETL(Organization):
     def __init__(self, org, config, db_config, database):
@@ -124,6 +127,23 @@ class ETL(Organization):
                 schema="datalake",
                 table="commits_json",
                 timestamp_col="(data -> 'commit' -> 'author' ->> 'date')",
+                db_config=self.db_config,
+                database=self.database,
+            ),
+        }
+
+        self.fetch_api(url, params, save_folder, file_prefix)
+
+    def fetch_org_events(self, save_folder: str, file_prefix="org_events"):
+        url = Organization.get_org_events_endpoint(self, repository="dbt-core")
+
+        params = {
+            "state": "all",
+            "per_page": 100,
+            "since": Filters.last_updated_filter(
+                schema="datalake",
+                table="org_events_json",
+                timestamp_col="data ->> 'created_at'",
                 db_config=self.db_config,
                 database=self.database,
             ),
