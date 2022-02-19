@@ -18,9 +18,9 @@ from airflow.operators.bash import BashOperator
 default_args = {
     'owner': 'magalorian',
     'depends_on_past': False,
-    #'email': ['airflow@example.com'],
-    #'email_on_failure': False,
-    #'email_on_retry': False,
+    # 'email': ['airflow@example.com'],
+    # 'email_on_failure': False,
+    # 'email_on_retry': False,
     'retries': 2,
     'retry_delay': timedelta(seconds=10),
     # 'queue': 'bash_queue',
@@ -39,25 +39,22 @@ default_args = {
 }
 
 with DAG(
-    'github_issues_data_pipeline',
-    default_args=default_args,
-    description='Fetch and load github issues to datalake',
-    schedule_interval=timedelta(minutes=5),
-    start_date=datetime(2021, 2, 7),
-    catchup=False,
-    tags=['ETL'],
+        'github_commits_data_pipeline',
+        default_args=default_args,
+        description='Fetch and load github issues to datalake',
+        schedule_interval=timedelta(minutes=5),
+        start_date=datetime(2021, 2, 7),
+        catchup=False,
+        tags=['ETL'],
 ) as dag:
-
-
-
     t1 = BashOperator(
-        task_id='fetch_issues',
-        bash_command='cd /opt/airflow/dags/Dataops && python3 main.py fetch-issues --database github'
+        task_id='fetch_commit',
+        bash_command='cd /opt/airflow/dags/Dataops && python3 main.py fetch-commits --database github'
     )
 
     t2 = BashOperator(
-        task_id='load_issues',
-        bash_command='cd /opt/airflow/dags/Dataops && python3 main.py load-github-issues --database github'
+        task_id='load_commits',
+        bash_command='cd /opt/airflow/dags/Dataops && python3 main.py load-github-commits --database github'
     )
 
     t1 >> t2
