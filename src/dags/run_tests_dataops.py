@@ -42,12 +42,12 @@ with DAG(
 ) as dag:
     t1 = BashOperator(
         task_id='run_unit_tests',
-        bash_command='cd /opt/airflow/dags/Dataops && PYTHONPATH=. pytest -vv ./tests/'
+        bash_command='cd /opt/airflow/dags/Dataops && PYTHONPATH=. /home/airflow/.local/bin/pytest -vv ./tests/'
     )
 
     t2 = BashOperator(
         task_id='run_dbt_tests',
-        bash_command='cd /opt/airflow/dags/Dataops/dataops_dbt && dbt test -t prod'
+        bash_command='cd /opt/airflow/dags/Dataops/dataops_dbt && /home/airflow/.local/bin/dbt test -t prod'
     )
 
     [t1, t2]
