@@ -74,7 +74,20 @@ def test_load_github_issues():
 
 def test_load_github_commits():
     db = Database(host=DB_CONFIG["host"], port=DB_CONFIG["port"],
-                 user=DB_CONFIG["user"], password=DB_CONFIG["password"],
-                 database=database)
+                  user=DB_CONFIG["user"], password=DB_CONFIG["password"],
+                  database=database)
 
     db.load_json_files(data_dir=f'{ETL_DATA_PATH}/commits', schema='datalake', table='commits_json')
+
+
+def test_fetch_org_events():
+    etl = ETL('dbt-labs', config=CONFIG, db_config=DB_CONFIG, database=database)
+    etl.fetch_org_events(save_folder='org_events')
+
+
+def test_load_org_events():
+    db = Database(host=DB_CONFIG["host"], port=DB_CONFIG["port"],
+                  user=DB_CONFIG["user"], password=DB_CONFIG["password"],
+                  database=database)
+
+    db.load_json_files(data_dir=f'{ETL_DATA_PATH}/org_events', schema='datalake', table='org_events_json')
