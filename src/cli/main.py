@@ -23,6 +23,7 @@ if CODE_ENV in ["STAGING", "PROD"]:
                            ${VAULT_ADDR}/v1/auth/userpass/login/dataops_bob""").read())
     os.environ["VAULT_TOKEN"] = login_resp["auth"]["client_token"]
 
+
     db_secrets = json.loads(os.popen(f"""curl -s \
                             --request GET \
                             -H "X-Vault-Token: {os.environ["VAULT_TOKEN"]}" \
@@ -154,3 +155,4 @@ def load_org_events(database: str):
 def list_repos():
     etl = ETL('dbt-labs', config=CONFIG, db_config=DB_CONFIG)
     etl.list_org_repos()
+
