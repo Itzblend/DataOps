@@ -12,7 +12,7 @@ sources:
     tables:
       - name: issues_json
         columns:
-          - name: ((data ->> 'id'), (data ->> 'updated_at'))
+          - name: ((data ->> 'repository_url'), (data ->> 'id'), (data ->> 'updated_at'))
             tests:
               - unique
               - not_null

@@ -16,18 +16,20 @@ code_env_dict = {
     "PROD": "database-production"
 }
 
-login_resp = json.loads(os.popen("""curl -s \
-                       --request POST \
-                       --data '{"password": "'"$DATAOPS_BOB_VAULT_PASS"'"}' \
-                       ${VAULT_ADDR}/v1/auth/userpass/login/dataops_bob""").read())
-os.environ["VAULT_TOKEN"] = login_resp["auth"]["client_token"]
+if CODE_ENV in ["STAGING", "PROD"]:
+    login_resp = json.loads(os.popen("""curl -s \
+                           --request POST \
+                           --data '{"password": "'"$DATAOPS_BOB_VAULT_PASS"'"}' \
+                           ${VAULT_ADDR}/v1/auth/userpass/login/dataops_bob""").read())
+    os.environ["VAULT_TOKEN"] = login_resp["auth"]["client_token"]
 
-db_secrets = json.loads(os.popen(f"""curl -s \
-                        --request GET \
-                        -H "X-Vault-Token: {os.environ["VAULT_TOKEN"]}" \
-                        {os.environ["VAULT_ADDR"]}/v1/dataops_staging/data/database""").read())
+    db_secrets = json.loads(os.popen(f"""curl -s \
+                            --request GET \
+                            -H "X-Vault-Token: {os.environ["VAULT_TOKEN"]}" \
+                            {os.environ["VAULT_ADDR"]}/v1/dataops_staging/data/database""").read())
 
-os.environ["DATAOPS_STAGING_DB_PASS"] = db_secrets["data"]["data"]["password"]
+    os.environ["DATAOPS_STAGING_DB_PASS"] = db_secrets["data"]["data"]["password"]
+    os.environ["DATAOPS_STAGING_DB_HOST"] = db_secrets["data"]["data"]["host"]
 
 
 @click.group()
@@ -146,3 +148,9 @@ def load_org_events(database: str):
                   database=database)
 
     db.load_json_files(data_dir=f'{ETL_DATA_PATH}/org_events', schema='datalake', table='org_events_json')
+
+
+@main.command()
+def list_repos():
+    etl = ETL('dbt-labs', config=CONFIG, db_config=DB_CONFIG)
+    etl.list_org_repos()

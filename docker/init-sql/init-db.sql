@@ -26,6 +26,8 @@ CREATE TABLE issues_json
 (
     data JSON
 );
+CREATE UNIQUE INDEX issues_json_unique ON issues_json ((data - >> 'repository_url'), (data ->> 'id'), (data ->> 'updated_at'));
+
 CREATE TABLE pulls_json
 (
     data JSON
